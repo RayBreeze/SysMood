@@ -26,7 +26,7 @@ Hey there, the lone wonderer here!
 ### 1. Clone This Repo
 
 ```sh
-git clone https://github.com/yourusername/SysMood.git
+git clone https://github.com/RayBreeze/SysMood.git
 cd SysMood
 ```
 
