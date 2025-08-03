@@ -3,23 +3,17 @@
 
 #include <string>
 #include <vector>
+#include <windows.h> // For ULARGE_INTEGER
+#include <winioctl.h> // For DISK_PERFORMANCE, STORAGE_DEVICE_NUMBER, etc.
 
-#ifdef _WIN32
-#include <windows.h>
 struct DiskInfo {
     std::string mountPoint;
     ULARGE_INTEGER totalSpace;
     ULARGE_INTEGER freeSpace;
+#ifdef _WIN32
     DISK_PERFORMANCE diskPerformance;
-};
-#else
-struct DiskInfo {
-    std::string mountPoint;
-    unsigned long long totalSpace;
-    unsigned long long freeSpace;
-    // IOPS data is more complex to get on Linux and will be omitted for now.
-};
 #endif
+};
 
 std::vector<DiskInfo> getDiskInfo();
 

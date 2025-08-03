@@ -1,110 +1,86 @@
 #include <iostream>
-#include "config.h"
+#include <string>
+#include <vector>
+#include <chrono>
+#include <thread>
+#include <windows.h>
+#include <Lmcons.h>
+#include <tlhelp32.h>
+#include <Psapi.h>
+
+#include <random>
+#include <algorithm>
+#include <map>
+#include <iomanip>
+#include <sstream>
+#include <limits>
+
+#include "cpu_monitor.h"
+#include "memory_monitor.h"
+#include "disk_monitor.h"
+#include "network_monitor.h"
+#include "process_monitor.h"
+#include "temperature_monitor.h"
+#include "logging.h"
 #include "web_server.h"
 
-#ifdef _WIN32
-#include <windows.h>
+// Function to display ASCII art banner
+void display_banner() {
+    std::cout << R"""(
+________       ___    ___ ________  _____ ______   ________  ________  ________     
+|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
+\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_|\ \   
+ \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
+  \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
+    ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
+   |\_________\\___/ /       |\_________\|__|     \|__|\|_______|\|_______|\|_______|
+   \|_________\|___|/        \|_________|                                            
 
-SERVICE_STATUS        g_ServiceStatus = {0};
-SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
-HANDLE                g_ServiceStopEvent = INVALID_HANDLE_VALUE;
-
-VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv);
-VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode);
-
-#else
-#include <unistd.h>
-#include <sys/stat.h>
-#endif
-
-void run_daemon() {
-#ifdef _WIN32
-    SERVICE_TABLE_ENTRY ServiceTable[] = {
-        {(LPSTR)"SysMood", (LPSERVICE_MAIN_FUNCTION)ServiceMain},
-        {NULL, NULL}
-    };
-
-    if (StartServiceCtrlDispatcher(ServiceTable) == FALSE) {
-        // Handle error
-    }
-#else
-    pid_t pid, sid;
-    pid = fork();
-    if (pid < 0) { exit(EXIT_FAILURE); }
-    if (pid > 0) { exit(EXIT_SUCCESS); }
-    umask(0);
-    sid = setsid();
-    if (sid < 0) { exit(EXIT_FAILURE); }
-    if ((chdir("/")) < 0) { exit(EXIT_FAILURE); }
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-#endif
-    start_web_server();
+)___""" << std::endl;
+    std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc > 1 && std::string(argv[1]) == "--daemonize") {
-        run_daemon();
+// Function to get system mood based on CPU and memory usage
+std::string get_system_mood(double cpu_usage, double memory_usage) {
+    std::string mood;
+    if (cpu_usage > 80 || memory_usage > 80) {
+        mood = "I'm feeling the heat! My CPU and memory are working overtime!";
+    } else if (cpu_usage > 50 || memory_usage > 50) {
+        mood = "I'm a bit busy, but I can handle it. Just don't open too many tabs!";
     } else {
-        Config config = load_config();
-        start_web_server();
+        mood = "Yeah I am chilling here, totally chillll ;)";
     }
-
-    return 0;
+    return mood;
 }
 
-#ifdef _WIN32
-VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv) {
-    g_StatusHandle = RegisterServiceCtrlHandler("SysMood", ServiceCtrlHandler);
-    if (g_StatusHandle == NULL) {
-        return;
+// Function to get memory mood
+std::string get_memory_mood(double memory_usage) {
+    std::string mood;
+    if (memory_usage > 90) {
+        mood = "I'm suffocating! Close some applications, please!";
+    } else if (memory_usage > 70) {
+        mood = "My memory is getting full. I might slow down soon.";
+    } else if (memory_usage > 40) {
+        mood = "I'm comfortable with my current memory usage.";
+    } else {
+        mood = "So much free memory! I could host a party in here!";
     }
-
-    ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
-    g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-    g_ServiceStatus.dwControlsAccepted = 0;
-    g_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
-    g_ServiceStatus.dwWin32ExitCode = 0;
-    g_ServiceStatus.dwServiceSpecificExitCode = 0;
-    g_ServiceStatus.dwCheckPoint = 0;
-
-    SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
-
-    g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    if (g_ServiceStopEvent == NULL) {
-        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-        SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
-        return;
-    }
-
-    g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-    g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
-    SetServiceStatus(g_SvcStatusHandle, &g_ServiceStatus);
-
-    // Start the web server in a separate thread
-    std::thread web_server_thread(start_web_server);
-
-    WaitForSingleObject(g_ServiceStopEvent, INFINITE);
-
-    // Stop the web server (this is a bit tricky with httplib, so we'll just exit)
-    web_server_thread.detach();
-
-    CloseHandle(g_ServiceStopEvent);
-
-    g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-    SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
+    return mood;
 }
 
-VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode) {
-    switch (CtrlCode) {
-    case SERVICE_CONTROL_STOP:
-        if (g_ServiceStatus.dwCurrentState == SERVICE_RUNNING) {
-            SetEvent(g_ServiceStopEvent);
-        }
-        break;
-    default:
-        break;
-    }
-}
-#endif
+int main() {
+    display_banner();
+    std::cout << "========================System Stats=======================" << std::endl;
+
+    // Initial data collection
+    double cpu_usage = getCpuUsage();
+    MemoryInfo mem_info = getMemoryInfo();
+
+    std::cout << "CPU Usage: " << std::fixed << std::setprecision(0) << cpu_usage << "%" << std::endl;
+    std::cout << "Memory Usage: " << std::fixed << std::setprecision(0) << mem_info.usage_percent << "%" << std::endl;
+    std::cout << "Memory Available: " << mem_info.available_mb << " MB" << std::endl;
+    std::cout << "Memory Total: " << mem_info.total_mb << " MB" << std::endl;
+    std::cout << "Memory Used: " << mem_info.used_mb << " MB" << std::endl;
+    std::cout << "===========================================================" << std::endl;
+
+    std::cout << "========================System Mood========================

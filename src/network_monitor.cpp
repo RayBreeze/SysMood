@@ -39,6 +39,8 @@ std::vector<NetworkConnection> getActiveConnections() {
             conn.protocol = "TCP";
             char localAddr[INET_ADDRSTRLEN];
             char remoteAddr[INET_ADDRSTRLEN];
+            // Use RtlIpv4AddressToStringA for Windows
+            // For inet_ntop, ensure ws2tcpip.h is included and linked with Ws2_32.lib
             inet_ntop(AF_INET, &row.dwLocalAddr, localAddr, sizeof(localAddr));
             inet_ntop(AF_INET, &row.dwRemoteAddr, remoteAddr, sizeof(remoteAddr));
             conn.localAddress = localAddr;
@@ -70,6 +72,7 @@ std::vector<NetworkConnection> getActiveConnections() {
 #include <fstream>
 #include <sstream>
 #include <arpa/inet.h>
+#include <netinet/in.h> // For in_addr
 
 std::vector<NetworkInterfaceStats> getNetworkInterfaceStats() {
     std::vector<NetworkInterfaceStats> stats;

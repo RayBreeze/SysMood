@@ -76,6 +76,6 @@ void display_historical_summary() {
     std::cout << "====================Historical Averages==================== " << std::endl;
     std::cout << "Average CPU Usage: " << std::fixed << std::setprecision(2) << avg_cpu << "%" << std::endl;
     std::cout << "Average Memory Usage: " << std::fixed << std::setprecision(2) << avg_mem << "%" << std::endl;
-    std.cout << "(Based on the last " << cpu_history.size() << " entries)" << std::endl;
+    std::cout << "(Based on the last " << cpu_history.size() << " entries)" << std::endl;
     std::cout << "For detailed graphs, please open sysmood_log.csv in a spreadsheet program." << std::endl;
 }

@@ -2,13 +2,18 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <comdef.h>
-#include <Wbemidl.h>
-
+#ifdef _WIN32
+#include <objbase.h> // For CoInitializeEx, CoUninitialize
+#include <comdef.h>  // For _bstr_t
+#include <Wbemidl.h> // For WMI
 #pragma comment(lib, "wbemuuid.lib")
+#pragma comment(lib, "ole32.lib") // For CoInitializeEx, CoUninitialize
+#pragma comment(lib, "oleaut32.lib") // For VariantClear
+#endif
 
 std::vector<TemperatureInfo> getTemperatureInfo() {
     std::vector<TemperatureInfo> temps;
+#ifdef _WIN32
     HRESULT hres;
 
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -97,6 +102,6 @@ std::vector<TemperatureInfo> getTemperatureInfo() {
     pLoc->Release();
     pEnumerator->Release();
     CoUninitialize();
-
+#endif
     return temps;
 }
