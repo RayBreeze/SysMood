@@ -7,7 +7,7 @@
 // Written by: Samman Das (github.com/RayBreeze)
 // Written on: 2025-05-17
 // License: MIT
-// Version: 1.4
+// Version: 1.5
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License.
@@ -18,8 +18,8 @@
 // You should have received a copy of the MIT License
 // along with this program. If not, see <https://opensource.org/licenses/MIT>.
 // notes:
-//    - this file is the main cpp file yeah the backbone or the spine you can say 
-//    - It can predict your system's mood by checking the CPU and memory usage 
+//    - this file is the main cpp file yeah the backbone or the spine you can say 💻
+//    - It can predict your system's mood by checking the CPU and memory usage 🥰.
 //    - Might give you insight how to care of your system.
 //    - if you find a bug, please report it to me on github
 //
@@ -28,12 +28,14 @@
 #include <iomanip>
 #include <string>
 #include <algorithm>
+#include <chrono>
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 #include "disk_monitor.h"
 #include "network_monitor.h"
 #include "process_monitor.h"
 #include "temperature_monitor.h"
+#include "logging.h"
 
 // Helper function to convert wstring to string for output
 std::string wstringToString(const std::wstring& wstr) {
@@ -42,6 +44,13 @@ std::string wstringToString(const std::wstring& wstr) {
     std::string strTo(size_needed, 0);
     WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
     return strTo;
+}
+
+void printAllStats(const SystemSnapshot& snapshot) {
+    std::cout << "========================System Stats======================= " << std::endl;
+    std::cout << "CPU Usage: " << snapshot.cpu_percent << "%" << std::endl;
+    std::cout << "Memory Usage: " << snapshot.mem_percent << "%" << std::endl;
+    // ... add other stats from snapshot if needed
 }
 
 void printProcesses(const std::vector<ProcessInfo>& processes) {
@@ -60,92 +69,63 @@ void printProcesses(const std::vector<ProcessInfo>& processes) {
 
 int main() {
     Usage cpu;
+    init_logging();
 
-    // --- Initial System Stats Display ---
-    std::cout <<
-        R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
-|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
-\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_|\ \   
- \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
-  \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
-    ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
-   |\_________\\___/ /       |\_________|\__|     \|__|\|_______|\|_______|\|_______|
-   \|_________\|___|/        \|_________|                                            
+    char choice = 'r'; // Start with a refresh
+    std::vector<ProcessInfo> processes;
+    std::string sortKey = "pid";
 
-)" << std::endl;
-
-    std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
-    
-    // System Stats
-    std::cout << "========================System Stats======================= " << std::endl;
-    std::cout << "CPU Usage: " << cpu.now() << "%" << std::endl;
-    std::cout << "Memory Usage: " << memory_percent() << "%" << std::endl;
-    std::cout << "Memory Available: " << memory_available() << " MB" << std::endl;
-    std::cout << "Memory Total: " << memory_total() << " MB" << std::endl;
-    std::cout << "Memory Used: " << memory_used() << " MB" << std::endl;
-
-    // Disk Usage
-    std::cout << "========================Disk Usage========================= " << std::endl;
-    std::vector<DiskInfo> disks = getDiskInfo();
-    for (const auto& disk : disks) {
-        double totalSpaceGB = static_cast<double>(disk.totalSpace.QuadPart) / (1024 * 1024 * 1024);
-        double freeSpaceGB = static_cast<double>(disk.freeSpace.QuadPart) / (1024 * 1024 * 1024);
-        std::cout << "Drive: " << disk.mountPoint << std::endl;
-        std::cout << "  - Total Space: " << std::fixed << std::setprecision(2) << totalSpaceGB << " GB" << std::endl;
-        std::cout << "  - Free Space: " << std::fixed << std::setprecision(2) << freeSpaceGB << " GB" << std::endl;
-    }
-
-    // Temperature
-    std::cout << "======================Temperatures========================= " << std::endl;
-    std::vector<TemperatureInfo> temps = getTemperatureInfo();
-    if (temps.empty()) {
-        std::cout << "No temperature sensors found or failed to read data." << std::endl;
-    } else {
-        for (const auto& temp : temps) {
-            std::cout << wstringToString(temp.sensorName) << ": " << std::fixed << std::setprecision(1) << temp.currentTemperature << " " << wstringToString(temp.unit) << std::endl;
-        }
-    }
-
-    // --- Interactive Process Management ---
-    std::vector<ProcessInfo> processes = getProcessList();
-    std::string sortKey = "pid"; // Default sort
-
-    char choice;
     do {
-        std::cout << "\n======================Process Management======================= " << std::endl;
-        sortProcesses(processes, sortKey);
-        printProcesses(processes);
-        std::cout << "\n[l]ist/refresh, [s]ort, [k]ill, [q]uit: ";
-        std::cin >> choice;
+        if (choice == 'r') { // Refresh data
+            // 1. Gather all data
+            SystemSnapshot snapshot;
+            snapshot.timestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            snapshot.cpu_percent = cpu.now();
+            snapshot.mem_percent = memory_percent();
+            processes = getProcessList();
 
-        switch (choice) {
-            case 'l':
-                processes = getProcessList();
-                break;
-            case 's':
+            // 2. Log the new data
+            log_stats(snapshot);
+            apply_retention_policy();
+
+            // 3. Display all stats
+            std::cout << "\n\n--- Refreshed at " << snapshot.timestamp << " ---" << std::endl;
+            printAllStats(snapshot);
+            // ... print other stats sections (disk, temp, etc.)
+        }
+
+        if (choice == 'p') {
+            sortProcesses(processes, sortKey);
+            printProcesses(processes);
+            std::cout << "\n[s]ort, [k]ill, [b]ack to main menu: ";
+            std::cin >> choice;
+            if (choice == 's') {
                 std::cout << "Sort by (pid, name, memory): ";
                 std::cin >> sortKey;
-                break;
-            case 'k': {
+                choice = 'p'; // Go back to process view
+            } else if (choice == 'k') {
                 DWORD pidToKill;
                 std::cout << "Enter PID to kill: ";
                 std::cin >> pidToKill;
-                if (terminateProcessById(pidToKill)) {
-                    std::cout << "Process " << pidToKill << " terminated." << std::endl;
-                } else {
-                    std::cout << "Failed to terminate process " << pidToKill << "." << std::endl;
-                }
-                processes = getProcessList(); // Refresh list
-                break;
+                terminateProcessById(pidToKill);
+                choice = 'p'; // Refresh process view
+            } else {
+                choice = 'm'; // Go back to main menu
             }
-            case 'q':
-                std::cout << "Exiting SysMood." << std::endl;
-                break;
-            default:
-                std::cout << "Invalid choice." << std::endl;
-                break;
+            continue; // Loop back to process menu or main menu
         }
+
+        if (choice == 'h') {
+            display_historical_summary();
+        }
+
+        // Main Menu
+        std::cout << "\n=========================Main Menu========================= " << std::endl;
+        std::cout << "[r]efresh stats, [p]rocesses, [h]istory, [q]uit: ";
+        std::cin >> choice;
+
     } while (choice != 'q');
 
+    std::cout << "Exiting SysMood." << std::endl;
     return 0;
 }
