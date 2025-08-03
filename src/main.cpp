@@ -2,12 +2,12 @@
 //
 // Does what ?
 // - This code is the main file of a Sysmood program.
-// - It includes necessary libraries and defines the main function to get CPU, memory, disk, network, and process usage.
+// - It includes necessary libraries and defines the main function to get CPU, memory, disk, network, temperature, and process usage.
 //
 // Written by: Samman Das (github.com/RayBreeze)
 // Written on: 2025-05-17
 // License: MIT
-// Version: 1.3
+// Version: 1.4
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License.
@@ -18,8 +18,8 @@
 // You should have received a copy of the MIT License
 // along with this program. If not, see <https://opensource.org/licenses/MIT>.
 // notes:
-//    - this file is the main cpp file yeah the backbone or the spine you can say 💻
-//    - It can predict your system's mood by checking the CPU and memory usage 🥰.
+//    - this file is the main cpp file yeah the backbone or the spine you can say 
+//    - It can predict your system's mood by checking the CPU and memory usage 
 //    - Might give you insight how to care of your system.
 //    - if you find a bug, please report it to me on github
 //
@@ -33,6 +33,7 @@
 #include "disk_monitor.h"
 #include "network_monitor.h"
 #include "process_monitor.h"
+#include "temperature_monitor.h"
 
 // Helper function to convert wstring to string for output
 std::string wstringToString(const std::wstring& wstr) {
@@ -60,35 +61,52 @@ void printProcesses(const std::vector<ProcessInfo>& processes) {
 int main() {
     Usage cpu;
 
-    // Initial system stats display
-    int cpu_percent = cpu.now();
-    int mem_percent = memory_percent();
-    int mem_available = memory_available();
-    int mem_total = memory_total();
-    int mem_used = memory_used();
+    // --- Initial System Stats Display ---
     std::cout <<
         R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
 |\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
-\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_\ \   
+\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_|\ \   
  \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
   \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
     ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
-   |\_________\\___/ /       |\_________\|__|     \|__|\|_______|\|_______|\|_______|
+   |\_________\\___/ /       |\_________|\__|     \|__|\|_______|\|_______|\|_______|
    \|_________\|___|/        \|_________|                                            
 
 )" << std::endl;
 
     std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
+    
+    // System Stats
     std::cout << "========================System Stats======================= " << std::endl;
-    std::cout << "CPU Usage: " << cpu_percent << "%" << std::endl;
-    std::cout << "Memory Usage: " << mem_percent << "%" << std::endl;
-    std::cout << "Memory Available: " << mem_available << " MB" << std::endl;
-    std::cout << "Memory Total: " << mem_total << " MB" << std::endl;
-    std::cout << "Memory Used: " << mem_used << " MB" << std::endl;
+    std::cout << "CPU Usage: " << cpu.now() << "%" << std::endl;
+    std::cout << "Memory Usage: " << memory_percent() << "%" << std::endl;
+    std::cout << "Memory Available: " << memory_available() << " MB" << std::endl;
+    std::cout << "Memory Total: " << memory_total() << " MB" << std::endl;
+    std::cout << "Memory Used: " << memory_used() << " MB" << std::endl;
 
-    // ... (rest of the initial stats display)
+    // Disk Usage
+    std::cout << "========================Disk Usage========================= " << std::endl;
+    std::vector<DiskInfo> disks = getDiskInfo();
+    for (const auto& disk : disks) {
+        double totalSpaceGB = static_cast<double>(disk.totalSpace.QuadPart) / (1024 * 1024 * 1024);
+        double freeSpaceGB = static_cast<double>(disk.freeSpace.QuadPart) / (1024 * 1024 * 1024);
+        std::cout << "Drive: " << disk.mountPoint << std::endl;
+        std::cout << "  - Total Space: " << std::fixed << std::setprecision(2) << totalSpaceGB << " GB" << std::endl;
+        std::cout << "  - Free Space: " << std::fixed << std::setprecision(2) << freeSpaceGB << " GB" << std::endl;
+    }
 
-    // Interactive Process Management
+    // Temperature
+    std::cout << "======================Temperatures========================= " << std::endl;
+    std::vector<TemperatureInfo> temps = getTemperatureInfo();
+    if (temps.empty()) {
+        std::cout << "No temperature sensors found or failed to read data." << std::endl;
+    } else {
+        for (const auto& temp : temps) {
+            std::cout << wstringToString(temp.sensorName) << ": " << std::fixed << std::setprecision(1) << temp.currentTemperature << " " << wstringToString(temp.unit) << std::endl;
+        }
+    }
+
+    // --- Interactive Process Management ---
     std::vector<ProcessInfo> processes = getProcessList();
     std::string sortKey = "pid"; // Default sort
 
