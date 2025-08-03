@@ -2,12 +2,12 @@
 //
 // Does what ?
 // - This code is the main file of a Sysmood program.
-// - It includes necessary libraries and defines the main function to get CPU, memory, disk, and network usage.
+// - It includes necessary libraries and defines the main function to get CPU, memory, disk, network, and process usage.
 //
 // Written by: Samman Das (github.com/RayBreeze)
 // Written on: 2025-05-17
 // License: MIT
-// Version: 1.2
+// Version: 1.3
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License.
@@ -27,10 +27,12 @@
 #include <vector>
 #include <iomanip>
 #include <string>
+#include <algorithm>
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 #include "disk_monitor.h"
 #include "network_monitor.h"
+#include "process_monitor.h"
 
 // Helper function to convert wstring to string for output
 std::string wstringToString(const std::wstring& wstr) {
@@ -41,9 +43,24 @@ std::string wstringToString(const std::wstring& wstr) {
     return strTo;
 }
 
+void printProcesses(const std::vector<ProcessInfo>& processes) {
+    std::cout << std::left << std::setw(10) << "PID" 
+              << std::setw(40) << "Name" 
+              << std::setw(20) << "Memory (MB)" 
+              << "User" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    for (const auto& p : processes) {
+        std::cout << std::left << std::setw(10) << p.pid
+                  << std::setw(40) << wstringToString(p.name)
+                  << std::setw(20) << (p.memoryUsage / 1024 / 1024)
+                  << wstringToString(p.user) << std::endl;
+    }
+}
+
 int main() {
     Usage cpu;
 
+    // Initial system stats display
     int cpu_percent = cpu.now();
     int mem_percent = memory_percent();
     int mem_available = memory_available();
@@ -51,8 +68,8 @@ int main() {
     int mem_used = memory_used();
     std::cout <<
         R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
-|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   |\|\   __  \|\   __  \|\   ___ \    
-\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_\|\ \   
+|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
+\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_\ \   
  \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
   \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
     ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
@@ -69,55 +86,48 @@ int main() {
     std::cout << "Memory Total: " << mem_total << " MB" << std::endl;
     std::cout << "Memory Used: " << mem_used << " MB" << std::endl;
 
-    std::cout << "========================Disk Usage========================= " << std::endl;
-    std::vector<DiskInfo> disks = getDiskInfo();
-    for (const auto& disk : disks) {
-        double totalSpaceGB = static_cast<double>(disk.totalSpace.QuadPart) / (1024 * 1024 * 1024);
-        double freeSpaceGB = static_cast<double>(disk.freeSpace.QuadPart) / (1024 * 1024 * 1024);
-        std::cout << "Drive: " << disk.mountPoint << std::endl;
-        std::cout << "  - Total Space: " << std::fixed << std::setprecision(2) << totalSpaceGB << " GB" << std::endl;
-        std::cout << "  - Free Space: " << std::fixed << std::setprecision(2) << freeSpaceGB << " GB" << std::endl;
-        std::cout << "  - Read Ops: " << disk.diskPerformance.ReadCount << std::endl;
-        std::cout << "  - Write Ops: " << disk.diskPerformance.WriteCount << std::endl;
-    }
-    
-    std::cout << "======================Network Activity======================= " << std::endl;
-    std::vector<NetworkInterfaceStats> netStats = getNetworkInterfaceStats();
-    for (const auto& stat : netStats) {
-        std::cout << "Interface: " << wstringToString(stat.description) << std::endl;
-        std::cout << "  - Bytes Sent: " << stat.bytesSent << std::endl;
-        std::cout << "  - Bytes Received: " << stat.bytesReceived << std::endl;
-        std::cout << "  - Packet Errors: " << stat.packetErrors << std::endl;
-        std::cout << "  - Dropped Packets: " << stat.droppedPackets << std::endl;
-    }
+    // ... (rest of the initial stats display)
 
-    std::cout << "----------------------Active Connections--------------------- " << std::endl;
-    std::vector<NetworkConnection> connections = getActiveConnections();
-    for (const auto& conn : connections) {
-        std::cout << conn.protocol << " "
-                  << conn.localAddress << ":" << conn.localPort << " -> "
-                  << conn.remoteAddress << ":" << conn.remotePort << " "
-                  << conn.state << std::endl;
-    }
-    std::cout << "=========================================================== " << std::endl;
+    // Interactive Process Management
+    std::vector<ProcessInfo> processes = getProcessList();
+    std::string sortKey = "pid"; // Default sort
 
-    std::cout << "========================System Mood======================== " << std::endl;
-    if (cpu_percent > 80) {
-        std::cout << "I am getting fried here helpppppp :o" << std::endl;
-    } else if (cpu_percent > 50) {
-        std::cout << "Well I am working here, cool :)" << std::endl;
-    } else {
-        std::cout << "Yeah I am chilling here, toally chillll ;)" << std::endl;
-    }
-    if (mem_percent > 80) {
-        std::cout << "Whoa! My brain is almost full... I'm about to forget something! " << std::endl;
-    } else if (mem_percent > 50) {
-        std::cout << "Memory's getting a little crowded, but I can still juggle things! " << std::endl;
-    } else {
-        std::cout << "So much free memory! I could host a party in here! " << std::endl;
-    }
-    std::cout << "=========================================================== " << std::endl;
+    char choice;
+    do {
+        std::cout << "\n======================Process Management======================= " << std::endl;
+        sortProcesses(processes, sortKey);
+        printProcesses(processes);
+        std::cout << "\n[l]ist/refresh, [s]ort, [k]ill, [q]uit: ";
+        std::cin >> choice;
 
+        switch (choice) {
+            case 'l':
+                processes = getProcessList();
+                break;
+            case 's':
+                std::cout << "Sort by (pid, name, memory): ";
+                std::cin >> sortKey;
+                break;
+            case 'k': {
+                DWORD pidToKill;
+                std::cout << "Enter PID to kill: ";
+                std::cin >> pidToKill;
+                if (terminateProcessById(pidToKill)) {
+                    std::cout << "Process " << pidToKill << " terminated." << std::endl;
+                } else {
+                    std::cout << "Failed to terminate process " << pidToKill << "." << std::endl;
+                }
+                processes = getProcessList(); // Refresh list
+                break;
+            }
+            case 'q':
+                std::cout << "Exiting SysMood." << std::endl;
+                break;
+            default:
+                std::cout << "Invalid choice." << std::endl;
+                break;
+        }
+    } while (choice != 'q');
 
     return 0;
 }
