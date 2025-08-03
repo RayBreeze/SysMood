@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SysMood Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .metric { margin-bottom: 20px; }
+        .metric h2 { margin-bottom: 10px; color: #555; }
+        .bar-container { width: 100%; background-color: #e0e0e0; border-radius: 4px; }
+        .bar { height: 20px; background-color: #4CAF50; border-radius: 4px; text-align: center; color: white; line-height: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SysMood Dashboard</h1>
+        <div id="stats-container"></div>
+    </div>
+
+    <script>
+        function fetchData() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('stats-container');
+                    let html = '';
+
+                    // CPU Usage
+                    html += `<div class="metric">
+                                <h2>CPU Usage</h2>
+                                <div class="bar-container">
+                                    <div class="bar" style="width: ${data.cpu_usage}%">${data.cpu_usage}%</div>
+                                </div>
+                             </div>`;
+
+                    // Memory Usage
+                    html += `<div class="metric">
+                                <h2>Memory Usage</h2>
+                                <div class="bar-container">
+                                    <div class="bar" style="width: ${data.memory_usage}%">${data.memory_usage}%</div>
+                                </div>
+                                <p>${data.memory_used} MB / ${data.memory_total} MB</p>
+                             </div>`;
+
+                    // Disk Usage
+                    html += '<div class="metric"><h2>Disk Usage</h2>';
+                    data.disk_info.forEach(disk => {
+                        const used_gb = disk.total_space_gb - disk.free_space_gb;
+                        const usage_percent = (used_gb / disk.total_space_gb) * 100;
+                        html += `<p>${disk.mount_point}</p>
+                                 <div class="bar-container">
+                                     <div class="bar" style="width: ${usage_percent.toFixed(2)}%">${used_gb.toFixed(2)} GB / ${disk.total_space_gb.toFixed(2)} GB</div>
+                                 </div>`;
+                    });
+                    html += '</div>';
+
+                    // Temperature
+                    html += '<div class="metric"><h2>Temperatures</h2>';
+                    data.temperature_info.forEach(temp => {
+                        html += `<p>${temp.sensor_name}: ${temp.temperature.toFixed(1)} ${temp.unit}</p>`;
+                    });
+                    html += '</div>';
+
+                    container.innerHTML = html;
+                });
+        }
+
+        setInterval(fetchData, 2000); // Refresh every 2 seconds
+        fetchData(); // Initial fetch
+    </script>
+</body>
+</html>
