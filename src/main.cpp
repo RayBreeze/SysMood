@@ -2,12 +2,12 @@
 //
 // Does what ?
 // - This code is the main file of a Sysmood program.
-// - It includes necessary libraries and defines the main function to get CPU, memory, and disk usage.
+// - It includes necessary libraries and defines the main function to get CPU, memory, disk, and network usage.
 //
 // Written by: Samman Das (github.com/RayBreeze)
 // Written on: 2025-05-17
 // License: MIT
-// Version: 1.1
+// Version: 1.2
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License.
@@ -26,9 +26,20 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <string>
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 #include "disk_monitor.h"
+#include "network_monitor.h"
+
+// Helper function to convert wstring to string for output
+std::string wstringToString(const std::wstring& wstr) {
+    if (wstr.empty()) return std::string();
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+    std::string strTo(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+    return strTo;
+}
 
 int main() {
     Usage cpu;
@@ -41,7 +52,7 @@ int main() {
     std::cout <<
         R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
 |\   ____\     |\  \  /  /|\   ____\|\   _ \  _   |\|\   __  \|\   __  \|\   ___ \    
-\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_|\ \   
+\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_\|\ \   
  \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
   \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
     ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
@@ -68,6 +79,25 @@ int main() {
         std::cout << "  - Free Space: " << std::fixed << std::setprecision(2) << freeSpaceGB << " GB" << std::endl;
         std::cout << "  - Read Ops: " << disk.diskPerformance.ReadCount << std::endl;
         std::cout << "  - Write Ops: " << disk.diskPerformance.WriteCount << std::endl;
+    }
+    
+    std::cout << "======================Network Activity======================= " << std::endl;
+    std::vector<NetworkInterfaceStats> netStats = getNetworkInterfaceStats();
+    for (const auto& stat : netStats) {
+        std::cout << "Interface: " << wstringToString(stat.description) << std::endl;
+        std::cout << "  - Bytes Sent: " << stat.bytesSent << std::endl;
+        std::cout << "  - Bytes Received: " << stat.bytesReceived << std::endl;
+        std::cout << "  - Packet Errors: " << stat.packetErrors << std::endl;
+        std::cout << "  - Dropped Packets: " << stat.droppedPackets << std::endl;
+    }
+
+    std::cout << "----------------------Active Connections--------------------- " << std::endl;
+    std::vector<NetworkConnection> connections = getActiveConnections();
+    for (const auto& conn : connections) {
+        std::cout << conn.protocol << " "
+                  << conn.localAddress << ":" << conn.localPort << " -> "
+                  << conn.remoteAddress << ":" << conn.remotePort << " "
+                  << conn.state << std::endl;
     }
     std::cout << "=========================================================== " << std::endl;
 
