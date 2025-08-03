@@ -3,8 +3,9 @@
 
 #include <string>
 #include <vector>
-#include <windows.h>
 
+#ifdef _WIN32
+#include <windows.h>
 struct ProcessInfo {
     DWORD pid;
     std::wstring name;
@@ -12,9 +13,19 @@ struct ProcessInfo {
     SIZE_T memoryUsage; // in bytes
     std::wstring user;
 };
+#else
+#include <string>
+struct ProcessInfo {
+    int pid;
+    std::string name;
+    double cpuUsage; // Placeholder
+    long memoryUsage; // in KB
+    std::string user;
+};
+#endif
 
 std::vector<ProcessInfo> getProcessList();
 void sortProcesses(std::vector<ProcessInfo>& processes, const std::string& sortBy);
-bool terminateProcessById(DWORD pid);
+bool terminateProcessById(int pid);
 
 #endif // PROCESS_MONITOR_H

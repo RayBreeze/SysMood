@@ -1,4 +1,6 @@
 #include "process_monitor.h"
+
+#ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
 #include <algorithm>
@@ -90,7 +92,7 @@ void sortProcesses(std::vector<ProcessInfo>& processes, const std::string& sortB
     }
 }
 
-bool terminateProcessById(DWORD pid) {
+bool terminateProcessById(int pid) {
     HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
     if (hProcess == NULL) {
         return false;
@@ -99,3 +101,70 @@ bool terminateProcessById(DWORD pid) {
     CloseHandle(hProcess);
     return success;
 }
+
+#else
+#include <dirent.h>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <signal.h>
+
+std::vector<ProcessInfo> getProcessList() {
+    std::vector<ProcessInfo> processes;
+    DIR* dir = opendir("/proc");
+    if (dir) {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_type == DT_DIR) {
+                try {
+                    int pid = std::stoi(entry->d_name);
+                    std::ifstream status_file("/proc/" + std::to_string(pid) + "/status");
+                    if (status_file) {
+                        ProcessInfo p;
+                        p.pid = pid;
+                        std::string line;
+                        while (std::getline(status_file, line)) {
+                            if (line.rfind("Name:", 0) == 0) {
+                                p.name = line.substr(6);
+                            } else if (line.rfind("VmRSS:", 0) == 0) {
+                                p.memoryUsage = std::stol(line.substr(7));
+                            } else if (line.rfind("Uid:", 0) == 0) {
+                                // Getting user name from UID is more involved, so we'll skip it for now.
+                                p.user = "N/A";
+                            }
+                        }
+                        p.cpuUsage = 0.0; // Placeholder
+                        processes.push_back(p);
+                    }
+                } catch (const std::invalid_argument& e) {
+                    // Not a process directory
+                }
+            }
+        }
+        closedir(dir);
+    }
+    return processes;
+}
+
+void sortProcesses(std::vector<ProcessInfo>& processes, const std::string& sortBy) {
+    if (sortBy == "pid") {
+        std::sort(processes.begin(), processes.end(), [](const ProcessInfo& a, const ProcessInfo& b) {
+            return a.pid < b.pid;
+        });
+    } else if (sortBy == "memory") {
+        std::sort(processes.begin(), processes.end(), [](const ProcessInfo& a, const ProcessInfo& b) {
+            return a.memoryUsage > b.memoryUsage;
+        });
+    } else if (sortBy == "name") {
+        std::sort(processes.begin(), processes.end(), [](const ProcessInfo& a, const ProcessInfo& b) {
+            return a.name < b.name;
+        });
+    }
+}
+
+bool terminateProcessById(int pid) {
+    return kill(pid, SIGKILL) == 0;
+}
+
+#endif

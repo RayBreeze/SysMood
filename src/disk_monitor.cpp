@@ -1,4 +1,6 @@
 #include "disk_monitor.h"
+
+#ifdef _WIN32
 #include <windows.h>
 #include <iostream>
 #include <vector>
@@ -54,3 +56,28 @@ std::vector<DiskInfo> getDiskInfo() {
 
     return allDisksInfo;
 }
+#else
+#include <sys/statvfs.h>
+#include <mntent.h>
+#include <vector>
+
+std::vector<DiskInfo> getDiskInfo() {
+    std::vector<DiskInfo> allDisksInfo;
+    FILE *mount_table = setmntent("/etc/mtab", "r");
+    if (mount_table) {
+        struct mntent *mount_entry;
+        while ((mount_entry = getmntent(mount_table))) {
+            struct statvfs vfs;
+            if (statvfs(mount_entry->mnt_dir, &vfs) == 0) {
+                DiskInfo info;
+                info.mountPoint = mount_entry->mnt_dir;
+                info.totalSpace = vfs.f_bsize * vfs.f_blocks;
+                info.freeSpace = vfs.f_bsize * vfs.f_bfree;
+                allDisksInfo.push_back(info);
+            }
+        }
+        endmntent(mount_table);
+    }
+    return allDisksInfo;
+}
+#endif

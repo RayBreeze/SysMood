@@ -68,6 +68,23 @@ void start_web_server() {
         res.set_content(stats.dump(), "application/json");
     });
 
+    // Prometheus metrics endpoint
+    svr.Get("/metrics", [](const httplib::Request&, httplib::Response& res) {
+        Usage cpu;
+        std::stringstream ss;
+        ss << "# HELP sysmood_cpu_usage_percent CPU usage percentage.\n";
+        ss << "# TYPE sysmood_cpu_usage_percent gauge\n";
+        ss << "sysmood_cpu_usage_percent " << cpu.now() << "\n";
+
+        ss << "# HELP sysmood_memory_usage_percent Memory usage percentage.\n";
+        ss << "# TYPE sysmood_memory_usage_percent gauge\n";
+        ss << "sysmood_memory_usage_percent " << memory_percent() << "\n";
+
+        // Add other metrics here...
+
+        res.set_content(ss.str(), "text/plain; version=0.0.4");
+    });
+
     std::cout << "Starting web server at http://localhost:8080" << std::endl;
     svr.listen("localhost", 8080);
 }
