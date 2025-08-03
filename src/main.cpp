@@ -34,7 +34,17 @@ struct MemoryInfo {
 
 // Function to display ASCII art banner
 void display_banner() {
-    std::cout << "SysMood - System Monitoring Tool" << std::endl;
+    std::cout << R"(
+________       ___    ___ ________  _____ ______   ________  ________  ________     
+|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   |\|\   __  \|\   __  \|\   ___ \    
+\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_\| \   
+ \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
+  \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
+    ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
+   |\_________\\___/ /       |\_________\|__|     \|__|\|_______|\|_______|\|_______|
+   \|_________\|___|/        \|_________|                                            
+
+)___" << std::endl;
     std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
 }
 
@@ -86,7 +96,7 @@ int main() {
     std::cout << "Memory Used: " << mem_info.used_mb << " MB" << std::endl;
     std::cout << "===========================================================" << std::endl;
 
-    std::cout << "========================System Mood========================" << std::endl;
+    std::cout << "========================System Mood=======================" << std::endl;
     std::cout << get_system_mood(cpu_usage, mem_info.usage_percent) << std::endl;
     std::cout << get_memory_mood(mem_info.usage_percent) << std::endl;
     std::cout << "===========================================================" << std::endl;

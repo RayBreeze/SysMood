@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iomanip>
 #include <numeric>
+#include <sstream> // Added for std::stringstream
 
 const std::string LOG_FILE = "sysmood_log.csv";
 
@@ -78,4 +79,20 @@ void display_historical_summary() {
     std::cout << "Average Memory Usage: " << std::fixed << std::setprecision(2) << avg_mem << "%" << std::endl;
     std::cout << "(Based on the last " << cpu_history.size() << " entries)" << std::endl;
     std::cout << "For detailed graphs, please open sysmood_log.csv in a spreadsheet program." << std::endl;
+}
+
+// Definition for log_system_data
+void log_system_data() {
+    // This function needs to collect current system data and log it.
+    // For now, we'll just log dummy data or integrate with existing monitors.
+    // This will be properly implemented once other monitors are working.
+    SystemSnapshot snapshot;
+    snapshot.timestamp = std::chrono::duration_cast<std::chrono::seconds>(
+                             std::chrono::system_clock::now().time_since_epoch()).count();
+    // Placeholder values
+    snapshot.cpu_percent = 0; 
+    snapshot.mem_percent = 0;
+
+    log_stats(snapshot);
+    apply_retention_policy();
 }

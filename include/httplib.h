@@ -50,22 +50,19 @@ struct timeval {
 
 #else // defined(_WIN32) && !defined(__GNUC__)
 
+#ifdef __linux__
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#ifdef __linux__
 #include <resolv.h>
-#endif
 #include <netinet/tcp.h>
-#ifdef _AIX
 #include <sys/socket.h>
-#endif
 #include <sys/select.h>
-#include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/un.h>
 #include <unistd.h>
+#endif
 
 #endif // defined(_WIN32) && !defined(__GNUC__)
 
