@@ -22,42 +22,12 @@
 //    - not responsible if your computer is already crying out of memory 🥲
 //    - if you find a bug, please report it to me on github
 //
-#include <stdio.h>
-#include <cstdint>
-#include <windows.h>
-#include <stdlib.h>
-#define DIV 1024
-    int memory_percent(){
-        MEMORYSTATUSEX statusex;
+#ifndef MEMORY_MONITOR_H
+#define MEMORY_MONITOR_H
 
-        statusex.dwLength = sizeof(statusex);
+int memory_percent();
+int memory_available();
+int memory_total();
+int memory_used();
 
-        GlobalMemoryStatusEx(&statusex);
-        long long percent = statusex.dwMemoryLoad;
-
-        return percent;
-    }
-    int memory_available(){
-        MEMORYSTATUSEX statusex;
-
-        statusex.dwLength = sizeof(statusex);
-
-        GlobalMemoryStatusEx(&statusex);
-        long long available = statusex.ullAvailPhys / DIV / DIV;
-
-        return available;
-    }
-    int memory_total(){
-        MEMORYSTATUSEX statusex;
-        statusex.dwLength = sizeof(statusex);
-        GlobalMemoryStatusEx(&statusex);
-        long long total = statusex.ullTotalPhys / DIV / DIV;
-        return total;
-    }
-    int memory_used(){
-        MEMORYSTATUSEX statusex;
-        statusex.dwLength = sizeof(statusex);
-        GlobalMemoryStatusEx(&statusex);
-        long long used = statusex.ullTotalPhys - statusex.ullAvailPhys;
-        return used / DIV / DIV;
-    }
+#endif // MEMORY_MONITOR_H

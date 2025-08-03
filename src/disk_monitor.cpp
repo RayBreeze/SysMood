@@ -1,0 +1,56 @@
+#include "disk_monitor.h"
+#include <windows.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstdio>
+#include <memory>
+
+std::vector<DiskInfo> getDiskInfo() {
+    std::vector<DiskInfo> allDisksInfo;
+    char buffer[256];
+    DWORD bytesRead = GetLogicalDriveStringsA(sizeof(buffer) - 1, buffer);
+
+    if (bytesRead > 0) {
+        char* drive = buffer;
+        while (*drive) {
+            DiskInfo currentDiskInfo;
+            currentDiskInfo.mountPoint = drive;
+
+            ULARGE_INTEGER totalSpace, freeSpace;
+            if (GetDiskFreeSpaceExA(drive, nullptr, &totalSpace, &freeSpace)) {
+                currentDiskInfo.totalSpace = totalSpace;
+                currentDiskInfo.freeSpace = freeSpace;
+            } else {
+                currentDiskInfo.totalSpace.QuadPart = 0;
+                currentDiskInfo.freeSpace.QuadPart = 0;
+            }
+
+            // To get IOPS, we need the physical drive path
+            std::string volumePath = "\\\\.\\" + std::string(drive);
+            volumePath.pop_back(); // Remove trailing backslash
+            HANDLE hVolume = CreateFileA(volumePath.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+
+            if (hVolume != INVALID_HANDLE_VALUE) {
+                STORAGE_DEVICE_NUMBER sdn;
+                DWORD bytesReturned;
+                if (DeviceIoControl(hVolume, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof(sdn), &bytesReturned, NULL)) {
+                    char physicalDrivePath[100];
+                    sprintf_s(physicalDrivePath, "\\\\.\\PhysicalDrive%lu", sdn.DeviceNumber);
+                    HANDLE hDevice = CreateFileA(physicalDrivePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+
+                    if (hDevice != INVALID_HANDLE_VALUE) {
+                        DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, NULL, 0, &currentDiskInfo.diskPerformance, sizeof(DISK_PERFORMANCE), &bytesReturned, NULL);
+                        CloseHandle(hDevice);
+                    }
+                }
+                CloseHandle(hVolume);
+            }
+
+            allDisksInfo.push_back(currentDiskInfo);
+            drive += strlen(drive) + 1;
+        }
+    }
+
+    return allDisksInfo;
+}
