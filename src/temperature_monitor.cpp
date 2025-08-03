@@ -4,7 +4,7 @@
 #include <string>
 #ifdef _WIN32
 #include <objbase.h> // For CoInitializeEx, CoUninitialize
-#include <comdef.h>  // For _bstr_t
+#include <comdef.h>
 #include <Wbemidl.h> // For WMI
 #pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "ole32.lib") // For CoInitializeEx, CoUninitialize

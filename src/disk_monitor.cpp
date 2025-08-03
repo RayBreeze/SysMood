@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <memory>
 #include <winioctl.h> // For DISK_PERFORMANCE, STORAGE_DEVICE_NUMBER, etc.
-#include <strsafe.h> // For sprintf_s
+#include <strsafe.h>
 
 std::vector<DiskInfo> getDiskInfo() {
     std::vector<DiskInfo> allDisksInfo;

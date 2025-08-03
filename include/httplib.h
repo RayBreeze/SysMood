@@ -50,10 +50,7 @@ struct timeval {
 
 #else // defined(_WIN32) && !defined(__GNUC__)
 
-#ifndef _WIN32
 #include <arpa/inet.h>
-#endif
-#include <ifaddrs.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>

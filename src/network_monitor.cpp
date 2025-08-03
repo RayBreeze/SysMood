@@ -1,6 +1,8 @@
 #include "network_monitor.h"
 
 #ifdef _WIN32
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
@@ -39,8 +41,6 @@ std::vector<NetworkConnection> getActiveConnections() {
             conn.protocol = "TCP";
             char localAddr[INET_ADDRSTRLEN];
             char remoteAddr[INET_ADDRSTRLEN];
-            // Use RtlIpv4AddressToStringA for Windows
-            // For inet_ntop, ensure ws2tcpip.h is included and linked with Ws2_32.lib
             inet_ntop(AF_INET, &row.dwLocalAddr, localAddr, sizeof(localAddr));
             inet_ntop(AF_INET, &row.dwRemoteAddr, remoteAddr, sizeof(remoteAddr));
             conn.localAddress = localAddr;

@@ -24,19 +24,17 @@
 #include "logging.h"
 #include "web_server.h"
 
+// Define MemoryInfo struct for main.cpp
+struct MemoryInfo {
+    double usage_percent;
+    long long available_mb;
+    long long total_mb;
+    long long used_mb;
+};
+
 // Function to display ASCII art banner
 void display_banner() {
-    std::cout << R"""(
-________       ___    ___ ________  _____ ______   ________  ________  ________     
-|\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
-\ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  |\  \ \  |\  \ \  \_|\ \   
- \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \ \  
-  \|____|\  \    \/  /  /   \|____|\  \ \  \    \ \  \ \  \\\  \ \  \\\  \ \  _\\ \ 
-    ____\_\  \ __/  / /       ____\_\  \ \__\    \ \__\ \_______\ \_______\ \_______\
-   |\_________\\___/ /       |\_________\|__|     \|__|\|_______|\|_______|\|_______|
-   \|_________\|___|/        \|_________|                                            
-
-)___""" << std::endl;
+    std::cout << "SysMood - System Monitoring Tool" << std::endl;
     std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
 }
 
@@ -73,8 +71,13 @@ int main() {
     std::cout << "========================System Stats=======================" << std::endl;
 
     // Initial data collection
-    double cpu_usage = getCpuUsage();
-    MemoryInfo mem_info = getMemoryInfo();
+    Usage cpu_usage_monitor;
+    double cpu_usage = cpu_usage_monitor.now();
+    MemoryInfo mem_info;
+    mem_info.usage_percent = memory_percent();
+    mem_info.available_mb = memory_available();
+    mem_info.total_mb = memory_total();
+    mem_info.used_mb = memory_used();
 
     std::cout << "CPU Usage: " << std::fixed << std::setprecision(0) << cpu_usage << "%" << std::endl;
     std::cout << "Memory Usage: " << std::fixed << std::setprecision(0) << mem_info.usage_percent << "%" << std::endl;
@@ -83,4 +86,21 @@ int main() {
     std::cout << "Memory Used: " << mem_info.used_mb << " MB" << std::endl;
     std::cout << "===========================================================" << std::endl;
 
-    std::cout << "========================System Mood========================
+    std::cout << "========================System Mood========================" << std::endl;
+    std::cout << get_system_mood(cpu_usage, mem_info.usage_percent) << std::endl;
+    std::cout << get_memory_mood(mem_info.usage_percent) << std::endl;
+    std::cout << "===========================================================" << std::endl;
+
+    // Start web server in a separate thread
+    std::thread web_server_thread(start_web_server);
+    web_server_thread.detach(); // Detach the thread so it runs independently
+
+    // Main loop for console application
+    while (true) {
+        // Collect and log data every 5 seconds
+        log_system_data();
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
+
+    return 0;
+}
