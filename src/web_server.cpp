@@ -9,6 +9,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include <nlohmann/json.hpp> // For JSON serialization
 
 using json = nlohmann::json;
