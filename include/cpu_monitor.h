@@ -12,9 +12,7 @@ public:
 
 private:
 #ifdef _WIN32
-    ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
     int numProcessors;
-    HANDLE self;
 #else
     unsigned long long lastTotalUser, lastTotalUserLow, lastTotalSys, lastTotalIdle;
 #endif

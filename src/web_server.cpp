@@ -11,9 +11,11 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <nlohmann/json.hpp> // For JSON serialization
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
-using json = nlohmann::json;
+using std::string;
 
 // Helper to convert wstring to string
 std::string wstring_to_string(const std::wstring& wstr) {
@@ -38,36 +40,46 @@ void start_web_server() {
     // API endpoint to get system stats
     svr.Get("/api/stats", [](const httplib::Request&, httplib::Response& res) {
         Usage cpu;
-        json stats;
-        stats["cpu_usage"] = cpu.now();
-        stats["memory_usage"] = memory_percent();
-        stats["memory_available"] = memory_available();
-        stats["memory_total"] = memory_total();
-        stats["memory_used"] = memory_used();
+        std::stringstream json_response;
+        
+        // Build JSON response manually
+        json_response << "{";
+        json_response << "\"cpu_usage\":" << cpu.now() << ",";
+        json_response << "\"memory_usage\":" << memory_percent() << ",";
+        json_response << "\"memory_available\":" << memory_available() << ",";
+        json_response << "\"memory_total\":" << memory_total() << ",";
+        json_response << "\"memory_used\":" << memory_used() << ",";
 
         // Disk Info
-        json disk_info_json = json::array();
-        for (const auto& disk : getDiskInfo()) {
-            json d;
-            d["mount_point"] = disk.mountPoint;
-            d["total_space_gb"] = disk.totalSpace.QuadPart / (1024.0 * 1024.0 * 1024.0);
-            d["free_space_gb"] = disk.freeSpace.QuadPart / (1024.0 * 1024.0 * 1024.0);
-            disk_info_json.push_back(d);
+        json_response << "\"disk_info\":[";
+        std::vector<DiskInfo> diskInfo = getDiskInfo();
+        for (size_t i = 0; i < diskInfo.size(); ++i) {
+            const auto& disk = diskInfo[i];
+            json_response << "{";
+            json_response << "\"mount_point\":\"" << disk.mountPoint << "\",";
+            json_response << "\"total_space_gb\":" << (disk.totalSpace.QuadPart / (1024.0 * 1024.0 * 1024.0)) << ",";
+            json_response << "\"free_space_gb\":" << (disk.freeSpace.QuadPart / (1024.0 * 1024.0 * 1024.0));
+            json_response << "}";
+            if (i < diskInfo.size() - 1) json_response << ",";
         }
-        stats["disk_info"] = disk_info_json;
+        json_response << "],";
 
         // Temperature Info
-        json temp_info_json = json::array();
-        for (const auto& temp : getTemperatureInfo()) {
-            json t;
-            t["sensor_name"] = wstring_to_string(temp.sensorName);
-            t["temperature"] = temp.currentTemperature;
-            t["unit"] = wstring_to_string(temp.unit);
-            temp_info_json.push_back(t);
+        json_response << "\"temperature_info\":[";
+        std::vector<TemperatureInfo> tempInfo = getTemperatureInfo();
+        for (size_t i = 0; i < tempInfo.size(); ++i) {
+            const auto& temp = tempInfo[i];
+            json_response << "{";
+            json_response << "\"sensor_name\":\"" << wstring_to_string(temp.sensorName) << "\",";
+            json_response << "\"temperature\":" << temp.currentTemperature << ",";
+            json_response << "\"unit\":\"" << wstring_to_string(temp.unit) << "\"";
+            json_response << "}";
+            if (i < tempInfo.size() - 1) json_response << ",";
         }
-        stats["temperature_info"] = temp_info_json;
+        json_response << "]";
+        json_response << "}";
 
-        res.set_content(stats.dump(), "application/json");
+        res.set_content(json_response.str(), "application/json");
     });
 
     // Prometheus metrics endpoint

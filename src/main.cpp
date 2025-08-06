@@ -46,7 +46,7 @@ void display_banner() {
 }
 
 // Function to get system mood based on CPU and memory usage
-std::string get_system_mood(double cpu_usage, double memory_usage) {
+std::string get_system_mood(int cpu_usage, int memory_usage) {
     std::string mood;
     if (cpu_usage > 80 || memory_usage > 80) {
         mood = "I'm feeling the heat! My CPU and memory are working overtime!";
@@ -59,7 +59,7 @@ std::string get_system_mood(double cpu_usage, double memory_usage) {
 }
 
 // Function to get memory mood
-std::string get_memory_mood(double memory_usage) {
+std::string get_memory_mood(int memory_usage) {
     std::string mood;
     if (memory_usage > 90) {
         mood = "I'm suffocating! Close some applications, please!";
@@ -83,7 +83,7 @@ int main() {
 
         // Initial data collection with error handling
         Usage cpu_usage_monitor;
-        double cpu_usage = 0.0;
+        int cpu_usage = 0;
         MemoryInfo mem_info = {0};
         
         try {
@@ -101,16 +101,16 @@ int main() {
             std::cout << "Warning: Could not get memory info: " << e.what() << std::endl;
         }
 
-        std::cout << "CPU Usage: " << std::fixed << std::setprecision(0) << cpu_usage << "%" << std::endl;
-        std::cout << "Memory Usage: " << std::fixed << std::setprecision(0) << mem_info.usage_percent << "%" << std::endl;
+        std::cout << "CPU Usage: " << cpu_usage << "%" << std::endl;
+        std::cout << "Memory Usage: " << (int)mem_info.usage_percent << "%" << std::endl;
         std::cout << "Memory Available: " << mem_info.available_mb << " MB" << std::endl;
         std::cout << "Memory Total: " << mem_info.total_mb << " MB" << std::endl;
         std::cout << "Memory Used: " << mem_info.used_mb << " MB" << std::endl;
         std::cout << "===========================================================" << std::endl;
 
         std::cout << "========================System Mood=======================" << std::endl;
-        std::cout << get_system_mood(cpu_usage, mem_info.usage_percent) << std::endl;
-        std::cout << get_memory_mood(mem_info.usage_percent) << std::endl;
+        std::cout << get_system_mood(cpu_usage, (int)mem_info.usage_percent) << std::endl;
+        std::cout << get_memory_mood((int)mem_info.usage_percent) << std::endl;
         std::cout << "===========================================================" << std::endl;
 
         // Start web server in a separate thread with error handling

@@ -83,15 +83,21 @@ void display_historical_summary() {
 
 // Definition for log_system_data
 void log_system_data() {
-    // This function needs to collect current system data and log it.
-    // For now, we'll just log dummy data or integrate with existing monitors.
-    // This will be properly implemented once other monitors are working.
+    // Collect current system data and log it.
     SystemSnapshot snapshot;
     snapshot.timestamp = std::chrono::duration_cast<std::chrono::seconds>(
                              std::chrono::system_clock::now().time_since_epoch()).count();
-    // Placeholder values
-    snapshot.cpu_percent = 0; 
-    snapshot.mem_percent = 0;
+    
+    // Get actual system data
+    try {
+        Usage cpu_monitor;
+        snapshot.cpu_percent = cpu_monitor.now();
+        snapshot.mem_percent = memory_percent();
+    } catch (const std::exception& e) {
+        // If there's an error, use default values
+        snapshot.cpu_percent = 0; 
+        snapshot.mem_percent = 0;
+    }
 
     log_stats(snapshot);
     apply_retention_policy();
