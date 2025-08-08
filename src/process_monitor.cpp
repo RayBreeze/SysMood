@@ -65,6 +65,8 @@ std::vector<ProcessInfo> getProcessList() {
                 pi.user = getUserForProcess(hProcess);
 
                 // CPU usage is complex to calculate accurately for a single snapshot.
+                // Proper calculation requires sampling process times at two or more points and computing the difference,
+                // e.g., using GetProcessTimes and system tick counts over intervals. See MSDN docs: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes
                 // This is a placeholder.
                 pi.cpuUsage = 0.0;
 
