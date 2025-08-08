@@ -40,7 +40,10 @@ std::vector<DiskInfo> getDiskInfo() {
                 DWORD bytesReturned;
                 if (DeviceIoControl(hVolume, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof(sdn), &bytesReturned, NULL)) {
                     char physicalDrivePath[100];
-                    StringCbPrintfA(physicalDrivePath, sizeof(physicalDrivePath), "\\.\\PhysicalDrive%lu", sdn.DeviceNumber); // Using StringCbPrintfA instead of sprintf_s
+                    // Using StringCbPrintfA instead of sprintf_s or sprintf to help prevent buffer overflows.
+                    // StringCbPrintfA requires the buffer size to be specified, ensuring that the output is always null-terminated and does not exceed the buffer.
+                    // This makes it a safer alternative to sprintf and even sprintf_s, which can be misused if the buffer size is not handled correctly.
+                    StringCbPrintfA(physicalDrivePath, sizeof(physicalDrivePath), "\\.\\PhysicalDrive%lu", sdn.DeviceNumber);
                     HANDLE hDevice = CreateFileA(physicalDrivePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 
                     if (hDevice != INVALID_HANDLE_VALUE) {
