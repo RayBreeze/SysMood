@@ -8,16 +8,47 @@ Usage::Usage() {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
     numProcessors = sysInfo.dwNumberOfProcessors;
+
+    // Initialize previous times
+    FILETIME idleTime, kernelTime, userTime;
+    GetSystemTimes(&idleTime, &kernelTime, &userTime);
+    prevIdleTime = idleTime;
+    prevKernelTime = kernelTime;
+    prevUserTime = userTime;
 }
 
 int Usage::now() {
-    // For now, return a random CPU usage between 5-25% as a placeholder
-    // This is a temporary solution until we can implement proper CPU monitoring
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> dis(5, 25);
-    
-    return dis(gen);
+    FILETIME idleTime, kernelTime, userTime;
+    if (!GetSystemTimes(&idleTime, &kernelTime, &userTime)) {
+        // If unable to get times, return -1 or a suitable error value
+        return -1;
+    }
+
+    // Convert FILETIME to ULONGLONG
+    ULONGLONG idle = ((ULONGLONG)idleTime.dwHighDateTime << 32) | idleTime.dwLowDateTime;
+    ULONGLONG kernel = ((ULONGLONG)kernelTime.dwHighDateTime << 32) | kernelTime.dwLowDateTime;
+    ULONGLONG user = ((ULONGLONG)userTime.dwHighDateTime << 32) | userTime.dwLowDateTime;
+
+    ULONGLONG prevIdle = ((ULONGLONG)prevIdleTime.dwHighDateTime << 32) | prevIdleTime.dwLowDateTime;
+    ULONGLONG prevKernel = ((ULONGLONG)prevKernelTime.dwHighDateTime << 32) | prevKernelTime.dwLowDateTime;
+    ULONGLONG prevUser = ((ULONGLONG)prevUserTime.dwHighDateTime << 32) | prevUserTime.dwLowDateTime;
+
+    ULONGLONG sysIdleDiff = idle - prevIdle;
+    ULONGLONG sysKernelDiff = kernel - prevKernel;
+    ULONGLONG sysUserDiff = user - prevUser;
+
+    ULONGLONG sysTotal = sysKernelDiff + sysUserDiff;
+    int cpuUsage = 0;
+    if (sysTotal > 0) {
+        cpuUsage = (int)(100.0 * (sysTotal - sysIdleDiff) / sysTotal);
+    }
+
+    // Update previous times
+    prevIdleTime = idleTime;
+    prevKernelTime = kernelTime;
+    prevUserTime = userTime;
+
+    return cpuUsage;
 }
 
 #else
