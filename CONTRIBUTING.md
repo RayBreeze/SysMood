@@ -1,11 +1,11 @@
-# Contributing to SysMood 🚀
+# Contributing to SysMood
 
 Hey there, Welcome to SysMood, one of my summer project after learning C and C++ in College and scoring a B in the exam 🥲  
 Thanks for considering contributing to **SysMood**! Whether you're here to fix bugs, add features, improve documentation, or just make the system moods even quirkier, we welcome all contributions.
 
 ---
 
-## 🤝 How to Contribute
+## How to Contribute
 
 ### 1. Fork & Clone
 
@@ -53,16 +53,16 @@ Then create a Pull Request on GitHub with a clear description of your changes.
 
 ---
 
-## 🎯 What We'd Love Help With
+## What We'd Love Help With
 
-### 🐛 Bug Fixes
+### Bug Fixes
 
 - Memory leaks or performance issues
 - Incorrect system readings
 - Cross-platform compatibility issues
 - Any crashes or unexpected behavior
 
-### ✨ New Features
+### New Features
 
 - **Linux and macOS Support**: Help us make SysMood cross-platform!
 - **New System Metrics**: Disk usage, network stats, temperature monitoring
@@ -70,14 +70,14 @@ Then create a Pull Request on GitHub with a clear description of your changes.
 - **Configuration Options**: Config files for customizing moods and thresholds
 - **Different Output Formats**: JSON output, logging capabilities [However, I am a bit      sceptical about this one]
 
-### 📚 Documentation
+### Documentation
 
 - Improve README.md
 - Add code comments
 - Create usage examples
 - Write installation guides for different platforms
 
-### 🎨 Fun Stuff
+###  Fun Stuff
 
 - New ASCII art banners [Don't break the existing one if your's are not good 🥲]
 - More creative mood messages
@@ -86,7 +86,7 @@ Then create a Pull Request on GitHub with a clear description of your changes.
 
 ---
 
-## 🏗️ Development Setup
+## Development Setup
 
 ### Prerequisites
 
@@ -119,7 +119,7 @@ SysMood/
 
 ---
 
-## 📝 Code Style Guidelines
+## Code Style Guidelines
 
 ### General Principles
 
@@ -152,7 +152,7 @@ std::cout << "high cpu" << std::endl;
 
 ---
 
-## 🧪 Testing Your Changes
+## Testing Your Changes
 
 ### Manual Testing
 
@@ -173,7 +173,7 @@ std::cout << "high cpu" << std::endl;
 
 ---
 
-## 📋 Pull Request Guidelines
+## Pull Request Guidelines
 
 ### Before Submitting
 
@@ -211,7 +211,7 @@ std::cout << "high cpu" << std::endl;
 
 ---
 
-## 🚫 What Not to Contribute
+## What Not to Contribute
 
 - **Malicious code**: Obviously you don't wanna see the world burn 😶‍🌫️🙏🏻
 - **Copyrighted code**: Only contribute code you own or have permission to use. Please I am a independent developer, can't afford legal troubles
@@ -220,7 +220,7 @@ std::cout << "high cpu" << std::endl;
 
 ---
 
-## 🎉 Recognition
+## Recognition
 
 All contributors will be:
 
@@ -230,7 +230,7 @@ All contributors will be:
 
 ---
 
-## 📞 Getting Help
+## Getting Help
 
 - **Issues**: Open an issue on GitHub for bugs or feature requests
 - **Discussions**: Use GitHub Discussions for general questions
@@ -239,7 +239,7 @@ All contributors will be:
 
 ---
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 ### Be Nice
 
@@ -256,7 +256,7 @@ All contributors will be:
 
 ---
 
-## 🏆 First-Time Contributors
+## First-Time Contributors
 
 New to open source? No worries! Here are some good first issues to start with:
 
