@@ -47,9 +47,15 @@ g++ -Iinclude src/main.cpp -o SysMood.exe
 
 ---
 
+### Install via Winget
+
+```sh
+winget install SysMood
+```
+
 ## What You’ll See
 
-```
+```sh
 ________       ___    ___ ________  _____ ______   ________  ________  ________     
 |\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
 \ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  \|\  \ \  \|\  \ \  \_|\ \   
@@ -104,6 +110,6 @@ Made with ☕ and curiosity by [Samman Das (RayBreeze)](https://github.com/RayBr
 
 ---
 
-## Found a Bug? Want to Help?
+## Found a Bug? Want to Help? Contributions are Welcome
 
-Open an issue or PR! I’d love to see what you come up with.
+Open an issue or PR! I’d love to see what you come up with. See the [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
