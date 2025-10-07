@@ -16,23 +16,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup CMake (Ubuntu)
+      - name: Install dependencies
         if: matrix.os == 'ubuntu-latest'
-        uses: lukka/get-cmake@latest
+        run: sudo apt-get install -y build-essential cmake
 
-      - name: Setup MSVC dev environment (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: TheMrMilchmann/setup-msvc-dev@v4
-        with:
-          arch: x64
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-      - name: Configure and Build
-        run: |
-          mkdir -p build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build . --config Release
-
+      - name: Build
+        run: cmake --build build
 
       - name: Run tests
         if: always()
