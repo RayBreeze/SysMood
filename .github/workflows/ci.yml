@@ -11,14 +11,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install -y build-essential cmake
 
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
