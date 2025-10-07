@@ -26,15 +26,13 @@ jobs:
         with:
           arch: x64
 
-      - name: Configure
+      - name: Configure and Build
         run: |
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-
-      - name: Build
-        run: |
           cmake --build . --config Release
+
 
       - name: Run tests
         if: always()
