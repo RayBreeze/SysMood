@@ -34,7 +34,6 @@ jobs:
 
       - name: Build
         run: |
-          cd build
           cmake --build . --config Release
 
       - name: Run tests
