@@ -11,31 +11,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup CMake (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: lukka/get-cmake@v3
-
-      - name: Setup MSVC dev environment (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: TheMrMilchmann/setup-msvc-dev@v4
-        with:
-          arch: x64
-
       - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: |
-          cd build
-          cmake --build . --config Release
+        run: cmake --build build
 
       - name: Run tests
         if: always()
