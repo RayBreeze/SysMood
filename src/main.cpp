@@ -24,19 +24,22 @@
 //    - if you find a bug, please report it to me on github
 //
 #include <iostream>
+#include <ctime>
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 
-int main() {
+int main()
+{
     Usage cpu;
-
+    Memory memory;
     int cpu_percent = cpu.now();
-    int mem_percent = memory_percent();
-    int mem_available = memory_available();
-    int mem_total = memory_total();
-    int mem_used = memory_used();
-    std::cout << 
-R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
+    CPUStats stats = cpu.getCPUstats();
+    int mem_percent = memory.memory_percent();
+    int mem_available = memory.memory_available();
+    int mem_total = memory.memory_total();
+    int mem_used = memory.memory_used();
+    std::cout <<
+        R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
 |\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
 \ \  \___|_    \ \  \/  / | \  \___|\ \  \\\__\ \  \ \  \|\  \ \  \|\  \ \  \_|\ \   
  \ \_____  \    \ \    / / \ \_____  \ \  \\|__| \  \ \  \\\  \ \  \\\  \ \  \ \\ \  
@@ -46,33 +49,47 @@ R"(________       ___    ___ ________  _____ ______   ________  ________  ______
    \|_________\|___|/        \|_________|                                            
 
 )" << std::endl;
-    
-    std::cout << "Sysmood: Your system is feeling. It also has moods." << std::endl;
-    std::cout << "========================System Stats======================= " << std::endl;
-    std::cout << "CPU Usage: " << cpu_percent << "%" << std::endl;
-    std::cout << "Memory Usage: " << mem_percent << "%" << std::endl;
-    std::cout << "Memory Available: " << mem_available << " MB" << std::endl;
-    std::cout << "Memory Total: " << mem_total << " MB" << std::endl;
-    std::cout << "Memory Used: " << mem_used << " MB" << std::endl;
-    std::cout << "=========================================================== " << std::endl;
-    
-    std::cout << "========================System Mood======================== " << std::endl;
-    if (cpu_percent > 80) {
-        std::cout << "I am getting fried here helpppppp :o" << std::endl;
-    } else if (cpu_percent > 50) {
-        std::cout << "Well I am working here, cool :)" << std::endl;
-    } else {
-        std::cout << "Yeah I am chilling here, toally chillll ;)" << std::endl;
+
+    std::cout << "Sysmood: Your system is feeling. It also has moods." << '\n';
+    std::cout << "========================System Stats======================= " << '\n';
+    std::cout << "CPU Usage: " << cpu_percent << "%" << '\n';
+    std::cout << "Context Switches: " << stats.ctxt << '\n';
+    std::cout << "Boot Time: " << std::ctime(reinterpret_cast<time_t *>(&stats.btime)) << '\n';
+    std::cout << "Processes Created: " << stats.processes << '\n';
+    std::cout << "Processes Running: " << stats.procs_running << '\n';
+    std::cout << "Processes Blocked: " << stats.procs_blocked << '\n';
+    std::cout << "Memory Usage: " << mem_percent << "%" << '\n';
+    std::cout << "Memory Available: " << mem_available << " MB" << '\n';
+    std::cout << "Memory Total: " << mem_total << " MB" << '\n';
+    std::cout << "Memory Used: " << mem_used << " MB" << '\n';
+    std::cout << "=========================================================== " << '\n';
+
+    std::cout << "========================System Mood======================== " << '\n';
+    if (cpu_percent > 80)
+    {
+        std::cout << "I am getting fried here helpppppp :o" << '\n';
     }
-    if (mem_percent > 80) {
-        std::cout << "Whoa! My brain is almost full... I'm about to forget something! " << std::endl;
-    } else if (mem_percent > 50) {
-        std::cout << "Memory's getting a little crowded, but I can still juggle things! " << std::endl;
-    } else {
-        std::cout << "So much free memory! I could host a party in here! " << std::endl;
+    else if (cpu_percent > 50)
+    {
+        std::cout << "Well I am working here, cool :)" << '\n';
     }
-    std::cout << "=========================================================== " << std::endl;
-    
-    
+    else
+    {
+        std::cout << "Yeah I am chilling here, toally chillll ;)" << '\n';
+    }
+    if (mem_percent > 80)
+    {
+        std::cout << "Whoa! My brain is almost full... I'm about to forget something! " << '\n';
+    }
+    else if (mem_percent > 50)
+    {
+        std::cout << "Memory's getting a little crowded, but I can still juggle things! " << '\n';
+    }
+    else
+    {
+        std::cout << "So much free memory! I could host a party in here! " << '\n';
+    }
+    std::cout << "=========================================================== " << '\n';
+
     return 0;
 }
