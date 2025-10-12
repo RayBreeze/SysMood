@@ -27,6 +27,7 @@
 #include <ctime>
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
+#include "network_monitor.h"
 
 int main()
 {
@@ -40,6 +41,9 @@ int main()
     int mem_available = memory.memory_available();
     int mem_total = memory.memory_total();
     int mem_used = memory.memory_used();
+    double sent_rate_kbps, received_rate_kbps;
+    get_network_stats(sent_rate_kbps, received_rate_kbps);
+    double sum_rate_kbs = sent_rate_kbps + received_rate_kbps;
     std::cout <<
         R"(________       ___    ___ ________  _____ ______   ________  ________  ________     
 |\   ____\     |\  \  /  /|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\   ___ \    
@@ -66,6 +70,8 @@ int main()
     std::cout << "Memory Available: " << mem_available << " MB" << '\n';
     std::cout << "Memory Total: " << mem_total << " MB" << '\n';
     std::cout << "Memory Used: " << mem_used << " MB" << '\n';
+    std::cout << "Network Sent: " << sent_rate_kbps << " KB/s" << std::endl;
+    std::cout << "Network Received: " << received_rate_kbps << " KB/s" << std::endl;
     std::cout << "=========================================================== " << '\n';
 
     std::cout << "========================System Mood======================== " << '\n';
@@ -93,6 +99,19 @@ int main()
     {
         std::cout << "So much free memory! I could host a party in here! " << '\n';
     }
+
+    if (sum_rate_kbs <= 0.0) {
+        std::cout << "Hello...? Anyone out there? I think I'm alone in the digital void..." << std::endl;
+    } else if (sum_rate_kbs <= 10.0) { // 1–10 KB/s：low
+        std::cout << "I can barely feel the connection... maybe send a ping to keep me alive?" << std::endl;
+    } else if (sum_rate_kbs <= 100.0) { // 11–100 KB/s：moderate
+        std::cout << "Hmm... data's trickling in. Not bad, but I'm starting to warm up!" << std::endl;
+    } else if (sum_rate_kbs <= 1000.0) { // 101–1000 KB/s：good
+        std::cout << "Nice flow! I can stream tunes, fetch memes, and still feel chill~" << std::endl;
+    } else { // > 1000 KB/s：fast
+        std::cout << "Wooosh! Data's flying—pages load before you blink. I'm unstoppable!!! " << std::endl;
+    }
+    
     std::cout << "=========================================================== " << '\n';
 
     return 0;
