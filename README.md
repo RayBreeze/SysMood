@@ -1,4 +1,5 @@
 # SysMood
+[![CI](https://github.com/RayBreeze/SysMood/actions/workflows/ci.yml/badge.svg)](https://github.com/RayBreeze/SysMood/actions/workflows/ci.yml)
 
 Hey there, the lone wonderer here!  
 **SysMood** is a fun little console program for Windows that checks your CPU and memory usage, then tells you how your system is "feeling"—with some quirky moods and a splash of ASCII art.
@@ -18,6 +19,8 @@ Hey there, the lone wonderer here!
 
 - **ASCII Art Banner:**  
   Because every program deserves a cool entrance.
+
+  and many more....
 
 ---
 
@@ -53,7 +56,7 @@ g++ -Iinclude src/main.cpp -o SysMood.exe
 winget install SysMood
 ```
 
-## What You’ll See
+## What You’ll See [This is Demo of Release 1.0.0, future versions might differ...]
 
 ```sh
 ________       ___    ___ ________  _____ ______   ________  ________  ________     
@@ -93,7 +96,7 @@ So much free memory! I could host a party in here!
 
 ## What You Need
 
-- Windows (Linux folks—coming soon don't worry!)
+- OS [ Windows or Linux ]
 - C++17 or newer (tested with g++ and MSVC)
 
 ---
@@ -106,7 +109,17 @@ MIT License. See [LICENSE](LICENSE) for the legal stuff.
 
 ## Who Made This?
 
-Made with ☕ and curiosity by [Samman Das (RayBreeze)](https://github.com/RayBreeze)
+Made with ☕ and curiosity by [Samman Das (RayBreeze)](https://github.com/RayBreeze) and with the help of fellow Contributors across the Globe
+
+---
+
+## Contributors
+
+<a href="https://github.com/RayBreeze/SysMood/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=RayBreeze/SysMood" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 
