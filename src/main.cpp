@@ -33,7 +33,9 @@ int main()
     Usage cpu;
     Memory memory;
     int cpu_percent = cpu.now();
+#ifdef __linux__
     CPUStats stats = cpu.getCPUstats();
+#endif
     int mem_percent = memory.memory_percent();
     int mem_available = memory.memory_available();
     int mem_total = memory.memory_total();
@@ -53,11 +55,13 @@ int main()
     std::cout << "Sysmood: Your system is feeling. It also has moods." << '\n';
     std::cout << "========================System Stats======================= " << '\n';
     std::cout << "CPU Usage: " << cpu_percent << "%" << '\n';
+#ifdef __linux__
     std::cout << "Context Switches: " << stats.ctxt << '\n';
     std::cout << "Boot Time: " << std::ctime(reinterpret_cast<time_t *>(&stats.btime)) << '\n';
     std::cout << "Processes Created: " << stats.processes << '\n';
     std::cout << "Processes Running: " << stats.procs_running << '\n';
     std::cout << "Processes Blocked: " << stats.procs_blocked << '\n';
+#endif
     std::cout << "Memory Usage: " << mem_percent << "%" << '\n';
     std::cout << "Memory Available: " << mem_available << " MB" << '\n';
     std::cout << "Memory Total: " << mem_total << " MB" << '\n';
