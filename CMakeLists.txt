@@ -13,6 +13,10 @@ target_include_directories(SysMood PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
+if(WIN32)
+    target_link_libraries(SysMood PRIVATE Iphlpapi)
+endif()
+
 # Enable testing (used later)
 include(CTest)
 enable_testing()
