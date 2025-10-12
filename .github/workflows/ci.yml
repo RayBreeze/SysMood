@@ -28,7 +28,6 @@ jobs:
 
       - name: Run tests
         if: always()
-        shell: bash
         run: |
           cd build
           ctest --output-on-failure || true
