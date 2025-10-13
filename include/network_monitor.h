@@ -6,13 +6,15 @@
 // License: MIT
 // Version: 2.0
 //
+#include <cstdint>
+
+#ifdef _WIN32
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0602
 #endif
 
 #include <windows.h>
 #include <iphlpapi.h>
-#include <cstdint>
 #include <set>
 #include <stdlib.h>
 
@@ -105,5 +107,14 @@ static void get_network_stats(double &sent_rate_kbps, double &received_rate_kbps
     sent_rate_kbps = ((double)ds / 1024.0) / elapsed_s;
     received_rate_kbps = ((double)dr / 1024.0) / elapsed_s;
 }
+
+#else
+// Non-Windows platform: provide stub implementation
+static void get_network_stats(double &sent_rate_kbps, double &received_rate_kbps) {
+    // TODO: Implement network monitoring for Linux/macOS
+    sent_rate_kbps = 0.0;
+    received_rate_kbps = 0.0;
+}
+#endif // _WIN32
 
 #endif // NETWORK_MONITOR_H
