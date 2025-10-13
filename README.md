@@ -2,7 +2,7 @@
 [![CI](https://github.com/RayBreeze/SysMood/actions/workflows/ci.yml/badge.svg)](https://github.com/RayBreeze/SysMood/actions/workflows/ci.yml)
 
 Hey there, the lone wonderer here!  
-**SysMood** is a fun little console program for Windows that checks your CPU and memory usage, then tells you how your system is "feeling"—with some quirky moods and a splash of ASCII art.
+**SysMood** is a fun little console program for Windows and Linux that checks your CPU and memory usage, then tells you how your system is "feeling"—with some quirky moods and a splash of ASCII art.
 
 ---
 
