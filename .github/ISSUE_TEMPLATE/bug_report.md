@@ -1,39 +1,23 @@
----
-name: 🐛 Bug Report
-about: Report a bug or unexpected behavior
-title: "[Bug]: "
-labels: [bug]
-assignees: ''
----
+## Bug Report
 
-## 📋 Checklist (Before Submitting)
-- [ ] I have searched existing issues to avoid duplicates.
-- [ ] I’m running the latest version of the project.
-- [ ] I’ve included steps to reproduce and relevant environment info.
+## Summary
+Briefly describe the issue.
 
----
-
-## 🐛 Bug Description
-A clear and concise description of what the bug is.
-
-## 🔁 Steps to Reproduce
-Please describe the steps to reproduce the behavior:
+## Steps to Reproduce
 1. Go to '...'
 2. Click on '...'
-3. Scroll to '...'
-4. See error
+3. See error
 
-## 🤔 Expected Behavior
-What did you expect to happen instead?
+## Expected Behavior
+What you expected to happen.
 
-## 🖼️ Screenshots / Logs
-If applicable, add screenshots, error messages, or logs here.
+## Actual Behavior
+What actually happened.
 
-## 🧠 Environment
-- OS: <!-- e.g. Windows 11, Ubuntu 22.04 -->
-- Browser: <!-- e.g. Chrome 123 -->
-- App/Project Version: <!-- e.g. v1.2.3 -->
-- Other Relevant Info:
+## Environment
+- OS:
+- Browser/App Version:
+- Other details:
 
-## ➕ Additional Context
-Anything else we should know?
+## Additional Context
+Add any screenshots, logs, or notes here.
