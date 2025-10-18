@@ -1,32 +1,16 @@
----
-name: ✨ Feature Request
-about: Suggest a new idea, feature, or enhancement
-title: "[Feature]: "
-labels: [enhancement]
-assignees: ''
----
+## Feature Request
 
-## 📋 Checklist (Before Submitting)
-- [ ] I have searched existing issues and discussions.
-- [ ] I am not duplicating an already-requested feature.
-- [ ] I have clearly described the use case and value.
+##  Summary
+What feature would you like to see added?
 
----
+##  Motivation
+Why is this feature important or useful?
 
-## 💡 Describe the Feature
-What is the feature you would like to see?
+##  Proposed Solution
+How should it work?
 
-## 🎯 Problem / Use Case
-What problem does this solve or improve?
+##  Alternatives Considered
+List any alternative solutions or features you've considered.
 
-## 🚀 Proposed Solution
-How would this feature work?
-
-## 🔄 Alternatives Considered
-Have you considered other ways to solve this?
-
-## 🖼️ Mockups / Examples (optional)
-Add images or code examples that help clarify the idea.
-
-## ➕ Additional Context
-Links, references, or anything else that helps explain the request.
+##  Additional Context
+Add any mockups, examples, or links here.
